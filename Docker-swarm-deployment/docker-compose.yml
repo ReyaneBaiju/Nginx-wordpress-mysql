@@ -1,0 +1,45 @@
+services:
+
+  wordpress:
+    deploy:
+      replicas: 2
+    image: wordpress:6.8.0-php8.3-fpm
+    expose:
+      - 9000
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: reyan
+      WORDPRESS_DB_PASSWORD: Reyane@01
+      WORDPRESS_DB_NAME: word
+    volumes:
+      - wp-data:/var/www/html
+
+  db:
+    image: mysql:latest
+    deploy:
+      replicas: 2
+    environment:
+      MYSQL_DATABASE: word
+      MYSQL_USER: reyan
+      MYSQL_PASSWORD: Reyane@01
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+  nginx:
+     image: reyanebaiju/littleproject:nginx7
+     deploy:
+       replicas: 2
+     depends_on:
+      - wordpress
+     ports:
+      - 8085:80
+     volumes:
+      - wp-data:/var/www/html
+volumes:
+  wp-data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=fs-00b7c5990f1e37d1b.efs.ap-southeast-1.amazonaws.com,rw,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport
+      device: ":/"
+  db:
